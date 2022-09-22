@@ -1,0 +1,90 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<title>Document</title>
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet">
+		<style>
+            .html, body {
+                background-color: black;
+                color: white;
+            }
+		</style>
+	</head>
+	<body>
+		<center><h1 style="margin-top: 50px;">Red Team Beacon Dashboard</h1></center>
+		<div id="main" class="container my-3">
+
+		</div>
+
+		<script>
+            // Find difference in seconds between two dates
+            function diffInSeconds(date1, date2) {
+                return Math.round(Math.abs(date1 - date2) / 1000);
+            }
+
+            async function update() {
+                let response = await fetch("/api");
+                let data = await response.json();
+
+                document.getElementById("main").innerHTML = "";
+                let now = new Date();
+
+                for (let teamName of Object.keys(data.infrastructure)) {
+                    let hosts = data.infrastructure[teamName];
+
+                    // Create row header
+                    let rowHeader = document.createElement("div");
+                    rowHeader.className = "row my-3";
+					rowHeader.innerHTML = `<div class="col-12"><h2>${teamName}</h2></div>`;
+                    document.getElementById("main").appendChild(rowHeader);
+
+                    // Create row
+                    let row = document.createElement("div");
+                    row.classList.add("row", "mb-4");
+
+                    for (let hostName of Object.keys(hosts)) {
+                        let ip = hosts[hostName];
+
+                        // Add a column to row
+                        let col = document.createElement("div");
+                        col.innerHTML = `<h2>${hostName}</h2> ${ip} <br/>`;
+                        col.classList.add("col", "border", "rounded", "mx-3", "border-white", "p-3");
+                        col.style.height = "200px";
+
+                        if (data.beaconData[teamName][hostName] == null) {
+                            col.innerHTML += "<br/>Never Seen";
+                        } else {
+                            col.innerHTML += `<br/>Last seen: ${diffInSeconds(now, new Date(data.beaconData[teamName][hostName]))} seconds ago`;
+                        }
+
+                        if (data.beaconData[teamName][hostName]) {
+                            let beaconData = data.beaconData[teamName][hostName];
+                            let beaconTime = new Date(beaconData);
+                            let diff = diffInSeconds(now, beaconTime);
+                            if (diff < 60) {
+                                col.classList.add("bg-success");
+                            } else if (diff < 120) {
+                                col.classList.add("bg-warning");
+                            } else {
+                                col.classList.add("bg-danger");
+							}
+                        } else {
+                            col.classList.add("bg-danger");
+                        }
+
+                        row.appendChild(col);
+                    }
+
+                    // Add row to main
+                    document.getElementById("main").appendChild(row);
+                }
+            }
+
+            update();
+            setInterval(update, 1000);
+		</script>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"></script>
+	</body>
+</html>
