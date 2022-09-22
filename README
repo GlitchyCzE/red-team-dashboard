@@ -1,0 +1,12 @@
+Created By Zach Kroesen // Charlie Team Lead
+For CDT 2221 as Charlie Red Team
+
+**Installation**
+Requirements: Node.JS 16.x or higher
+
+Clone repository to the server machine (git clone, or download zip and extract)
+Run `npm install` inside the cloned directory
+Run `node index.js` to begin the server
+
+**Configuration**
+See configuration options at the top of index.js to change values such as port numbers and timeouts.
